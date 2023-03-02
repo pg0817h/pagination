@@ -20,9 +20,10 @@ const INITIAL_PAGE = 1;
 
 export const usePaginationContext = create<{
   pagination: Pagination;
-  setPagination: (pg: Pagination) => void;
+  setPagination: (pg: PaginationArgs) => void;
   setNextPage: () => void;
   setFirstPage: () => void;
+  setPrevPage: () => void;
 }>((set, get) => ({
   pagination: {
     totalPages: 0,
@@ -49,10 +50,12 @@ export const usePaginationContext = create<{
     const { nextEnabled, currentPage, totalPages, ...props } = get().pagination;
     const updatedPage = nextEnabled ? currentPage + 1 : currentPage;
     const updatedNextEnabled = updatedPage !== totalPages;
+
     set({
       pagination: {
         ...props,
         totalPages: totalPages,
+        previousEnabled: true,
         nextEnabled: updatedNextEnabled,
         currentPage: updatedPage,
       },
@@ -65,13 +68,22 @@ export const usePaginationContext = create<{
     set({
       pagination: {
         ...props,
+        // nextEnabled: true,
         previousEnabled: updatedPreviousEnabled,
         currentPage: updatedPage,
       },
     });
   },
   setFirstPage: () => {
-    set({ pagination: { ...get().pagination, currentPage: INITIAL_PAGE, nextEnabled: true, previousEnabled: false } });
+    const totalPages = get().pagination.totalPages;
+    set({
+      pagination: {
+        ...get().pagination,
+        currentPage: INITIAL_PAGE,
+        nextEnabled: totalPages !== INITIAL_PAGE,
+        previousEnabled: false,
+      },
+    });
   },
 }));
 
@@ -83,11 +95,10 @@ export interface ListContextProps {
 type ListPaginationContextProps = ListContextProps;
 
 const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> = ({ children, value }) => {
-  const { setPagination, pagination } = usePaginationContext();
+  const { setPagination } = usePaginationContext();
 
   React.useEffect(() => {
     setPagination({
-      ...pagination,
       pageSize: value.perPage,
       totalItems: value.total,
     });

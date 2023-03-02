@@ -5,7 +5,7 @@ import ListPaginationContextProvider, { usePaginationContext } from './list-pagi
 
 describe('ListPaginationContextProvider', () => {
   const NaiveList = () => {
-    const { pagination, setNextPage } = usePaginationContext();
+    const { pagination, setNextPage, setPrevPage } = usePaginationContext();
 
     return (
       <div>
@@ -13,6 +13,7 @@ describe('ListPaginationContextProvider', () => {
         <span>{`totalPages: ${pagination.totalPages}`}</span>
         <span>{`pageSize: ${pagination.pageSize}`}</span>
         {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
+        {pagination.previousEnabled && <button onClick={setPrevPage}>back</button>}
       </div>
     );
   };
@@ -35,11 +36,11 @@ describe('ListPaginationContextProvider', () => {
     expect(screen.getByText('view more')).not.toBeNull();
   });
 
-  it('should return currentPage, totalPages, pageSize and view more button when view more button is clicked', () => {
+  it('', () => {
     render(
       <ListPaginationContextProvider
         value={{
-          total: 4,
+          total: -1,
           perPage: 2,
         }}
       >
@@ -47,11 +48,45 @@ describe('ListPaginationContextProvider', () => {
       </ListPaginationContextProvider>,
     );
 
-    fireEvent.click(screen.getByText('view more'));
-
-    expect(screen.getByText('currentPage: 2')).not.toBeNull();
+    expect(screen.getByText('currentPage: 1')).not.toBeNull();
     expect(screen.getByText('totalPages: 2')).not.toBeNull();
     expect(screen.getByText('pageSize: 2')).not.toBeNull();
-    expect(screen.queryByText('view more')).toBeNull();
+    expect(screen.getByText('view more')).not.toBeNull();
+  });
+
+  describe('setNextPage', () => {
+    const getScreen = () =>
+      render(
+        <ListPaginationContextProvider
+          value={{
+            total: 4,
+            perPage: 2,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+    it('should return currentPage, totalPages, pageSize and view more button when view more button is clicked', () => {
+      const { getByText, queryByText } = getScreen();
+
+      fireEvent.click(getByText('view more'));
+
+      expect(getByText('currentPage: 2')).not.toBeNull();
+      expect(getByText('totalPages: 2')).not.toBeNull();
+      expect(getByText('pageSize: 2')).not.toBeNull();
+      expect(queryByText('view more')).toBeNull();
+    });
+
+    it('should render `back` button', () => {
+      const { getByText } = getScreen();
+
+      fireEvent.click(getByText('view more'));
+      fireEvent.click(getByText('back'));
+
+      expect(getByText('currentPage: 1')).not.toBeNull();
+      expect(getByText('totalPages: 2')).not.toBeNull();
+      expect(getByText('pageSize: 2')).not.toBeNull();
+    });
   });
 });
