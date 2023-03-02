@@ -6,6 +6,7 @@ import ListPaginationContextProvider, { usePaginationContext } from './list-pagi
 describe('ListPaginationContextProvider', () => {
   const NaiveList = () => {
     const { pagination, setNextPage } = usePaginationContext();
+
     return (
       <div>
         <span>{`currentPage: ${pagination.currentPage}`}</span>
@@ -17,7 +18,7 @@ describe('ListPaginationContextProvider', () => {
   };
 
   it('should return currentPage, totalPages, pageSize and view more button', () => {
-    const { getByText } = render(
+    render(
       <ListPaginationContextProvider
         value={{
           total: 4,
@@ -28,14 +29,14 @@ describe('ListPaginationContextProvider', () => {
       </ListPaginationContextProvider>,
     );
 
-    expect(getByText('currentPage: 1')).not.toBeNull();
-    expect(getByText('totalPages: 2')).not.toBeNull();
-    expect(getByText('pageSize: 2')).not.toBeNull();
-    expect(getByText('view more')).not.toBeNull();
+    expect(screen.getByText('currentPage: 1')).not.toBeNull();
+    expect(screen.getByText('totalPages: 2')).not.toBeNull();
+    expect(screen.getByText('pageSize: 2')).not.toBeNull();
+    expect(screen.getByText('view more')).not.toBeNull();
   });
 
-  it('should return currentPage, totalPages, pageSize and view more button', () => {
-    const { getByText } = render(
+  it('should return currentPage, totalPages, pageSize and view more button when view more button is clicked', () => {
+    render(
       <ListPaginationContextProvider
         value={{
           total: 4,
@@ -46,11 +47,11 @@ describe('ListPaginationContextProvider', () => {
       </ListPaginationContextProvider>,
     );
 
-    fireEvent.click(getByText('view more'));
+    fireEvent.click(screen.getByText('view more'));
 
-    expect(getByText('currentPage: 2')).not.toBeNull();
-    expect(getByText('totalPages: 2')).not.toBeNull();
-    expect(getByText('pageSize: 2')).not.toBeNull();
+    expect(screen.getByText('currentPage: 2')).not.toBeNull();
+    expect(screen.getByText('totalPages: 2')).not.toBeNull();
+    expect(screen.getByText('pageSize: 2')).not.toBeNull();
     expect(screen.queryByText('view more')).toBeNull();
   });
 });

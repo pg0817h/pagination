@@ -34,7 +34,7 @@ export const usePaginationContext = create<{
   },
   setPagination: (args: PaginationArgs) => {
     const totalPages = Math.ceil(args.totalItems / args.pageSize);
-    const nextEnabled = totalPages != INITIAL_PAGE;
+    const nextEnabled = totalPages !== INITIAL_PAGE;
     set({
       pagination: {
         ...args,
