@@ -85,7 +85,21 @@ describe('ListPaginationContextProvider', () => {
   });
 
   // TODO
-  describe('setFirstPage', () => {});
+  describe('setFirstPage', () => {
+    it('Should render a view more button when totalPage is not equal to `INITIAL_PAGE`', () => {
+      getScreen(4, 2);
+      expect(screen.getByText('currentPage: 1')).not.toBeNull();
+      expect(screen.queryByText('totalPages: 2')).not.toBeNull();
+      expect(screen.getByText('view more')).not.toBeNull();
+    });
+
+    it('Should not render a back button when it is first initialized', () => {
+      getScreen(4, 2);
+      expect(screen.getByText('currentPage: 1')).not.toBeNull();
+      expect(screen.queryByText('totalPages: 2')).not.toBeNull();
+      expect(screen.queryByText('back')).toBeNull();
+    });
+  });
 
   // TODO
   describe('setPagination validation', () => {
