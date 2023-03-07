@@ -68,7 +68,7 @@ export const usePaginationContext = create<{
     set({
       pagination: {
         ...props,
-        // nextEnabled: true,
+        nextEnabled: true,
         previousEnabled: updatedPreviousEnabled,
         currentPage: updatedPage,
       },
@@ -96,7 +96,7 @@ type ListPaginationContextProps = ListContextProps;
 
 const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> = ({ children, value }) => {
   const { setPagination } = usePaginationContext();
-
+  // TODO invalid number => Add a validation function (total | perPage < 0, Exceeding Integer limit )
   React.useEffect(() => {
     setPagination({
       pageSize: value.perPage,
