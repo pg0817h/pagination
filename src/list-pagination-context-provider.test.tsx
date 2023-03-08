@@ -1,19 +1,28 @@
 import * as React from 'react';
 import expect from 'expect';
 import { screen, render, fireEvent } from '@testing-library/react';
-import ListPaginationContextProvider, { usePaginationContext } from './list-pagination-context-provider';
+import ListPaginationContextProvider, {
+  usePaginationContext,
+  useErrorContext,
+} from './list-pagination-context-provider';
 
 describe('ListPaginationContextProvider', () => {
   const NaiveList = () => {
     const { pagination, setNextPage, setPrevPage } = usePaginationContext();
+    const { error } = useErrorContext();
 
     return (
       <div>
-        <span>{`currentPage: ${pagination.currentPage}`}</span>
-        <span>{`totalPages: ${pagination.totalPages}`}</span>
-        <span>{`pageSize: ${pagination.pageSize}`}</span>
-        {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
-        {pagination.previousEnabled && <button onClick={setPrevPage}>back</button>}
+        {error.error && <div data-testid="errorMessage">{error.errorMessage}</div>}
+        {!error.error && (
+          <>
+            <span>{`currentPage: ${pagination.currentPage}`}</span>
+            <span>{`totalPages: ${pagination.totalPages}`}</span>
+            <span>{`pageSize: ${pagination.pageSize}`}</span>
+            {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
+            {pagination.previousEnabled && <button onClick={setPrevPage}>back</button>}
+          </>
+        )}
       </div>
     );
   };
@@ -84,7 +93,6 @@ describe('ListPaginationContextProvider', () => {
     });
   });
 
-  // TODO
   describe('setFirstPage', () => {
     it('Should render a view more button when totalPage is not equal to `INITIAL_PAGE`', () => {
       getScreen(4, 2);
@@ -101,18 +109,15 @@ describe('ListPaginationContextProvider', () => {
     });
   });
 
-  // TODO
   describe('setPagination validation', () => {
-    // TODO
-    it('Total < 0 ', () => {
-      getScreen(-1, 2);
-
-      expect(screen.getByText('currentPage: 1')).not.toBeNull();
-      expect(screen.getByText('totalPages: 2')).not.toBeNull();
-      expect(screen.getByText('pageSize: 2')).not.toBeNull();
-      expect(screen.getByText('view more')).not.toBeNull();
+    it('Should return an error message when Total and perPage are negative', () => {
+      getScreen(-1, -2);
+      expect(screen.getByTestId('errorMessage')).not.toBeNull();
     });
-    // TODO
-    it('when Total | perPage is an invalid number', () => {});
+
+    it('Should return an error message when total and perpage exceed the maximum value of an integer', () => {
+      getScreen(Number.MAX_SAFE_INTEGER + 1, Number.MAX_SAFE_INTEGER + 1);
+      expect(screen.getByTestId('errorMessage')).not.toBeNull();
+    });
   });
 });

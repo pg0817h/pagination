@@ -119,7 +119,6 @@ type ListPaginationContextProps = ListContextProps;
 const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> = ({ children, value }) => {
   const { setPagination } = usePaginationContext();
   const { setValidationMessage } = useErrorContext();
-  // TODO invalid number => Add a validation function (total | perPage < 0, Exceeding Integer limit )
   React.useEffect(() => {
     if (value.total <= 0 || value.perPage <= 0) {
       setValidationMessage({
