@@ -12,34 +12,11 @@ type PaginationMeta = {
   previousEnabled: boolean;
   nextEnabled: boolean;
 };
-type ErrorState = {
-  error: boolean;
-  errorMessage: string;
-};
 
 type Pagination = PaginationState & PaginationMeta;
 type PaginationArgs = Pick<PaginationState, 'totalItems' | 'pageSize'>;
-type ErrorArgs = Pick<ErrorState, 'errorMessage'>;
 const INITIAL_PAGE = 1;
-export const useErrorContext = create<{
-  error: ErrorState;
-  setValidationMessage: (args: ErrorArgs) => void;
-}>((set, get) => ({
-  error: {
-    error: false,
-    errorMessage: '',
-  },
-  setValidationMessage: (args: ErrorArgs) => {
-    let updateMessage = args.errorMessage;
 
-    set({
-      error: {
-        error: !!updateMessage,
-        errorMessage: updateMessage,
-      },
-    });
-  },
-}));
 export const usePaginationContext = create<{
   pagination: Pagination;
   setPagination: (pg: PaginationArgs) => void;
@@ -118,21 +95,12 @@ type ListPaginationContextProps = ListContextProps;
 
 const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> = ({ children, value }) => {
   const { setPagination } = usePaginationContext();
-  const { setValidationMessage } = useErrorContext();
   React.useEffect(() => {
     if (value.total <= 0 || value.perPage <= 0) {
-      setValidationMessage({
-        errorMessage: 'The total items and page size must be positive numbers. Please try again.',
-      });
+      throw new Error('The total items and page size must be positive numbers. Please try again.');
     } else if (value.total >= Number.MAX_SAFE_INTEGER || value.perPage >= Number.MAX_SAFE_INTEGER) {
-      setValidationMessage({
-        errorMessage:
-          'The number of items exceeds the maximum safe integer value. Please reduce the number of items and try again.',
-      });
+      throw new Error('The number of items exceeds the maximum safe integer value. Please reduce the number of items and try again.');
     } else {
-      setValidationMessage({
-        errorMessage: '',
-      });
       setPagination({
         pageSize: value.perPage,
         totalItems: value.total,
