@@ -1,4 +1,5 @@
 import React from 'react';
+import { create } from 'zustand';
 
 type PaginationState = {
   totalItems: number;
@@ -19,9 +20,10 @@ const INITIAL_PAGE = 1;
 
 export const usePaginationContext = create<{
   pagination: Pagination;
-  setPagination: (pg: Pagination) => void;
+  setPagination: (pg: PaginationArgs) => void;
   setNextPage: () => void;
   setFirstPage: () => void;
+  setPrevPage: () => void;
 }>((set, get) => ({
   pagination: {
     totalPages: 0,
@@ -31,10 +33,58 @@ export const usePaginationContext = create<{
     previousEnabled: false,
     totalItems: 0,
   },
-  setPagination: (args: PaginationArgs) => {},
-  setNextPage: () => {},
-  setPrevPage: () => {},
-  setFirstPage: () => {},
+  setPagination: (args: PaginationArgs) => {
+    const totalPages = Math.ceil(args.totalItems / args.pageSize);
+    const nextEnabled = totalPages !== INITIAL_PAGE;
+    set({
+      pagination: {
+        ...args,
+        totalPages: totalPages,
+        nextEnabled: nextEnabled,
+        currentPage: INITIAL_PAGE,
+        previousEnabled: false,
+      },
+    });
+  },
+  setNextPage: () => {
+    const { nextEnabled, currentPage, totalPages, ...props } = get().pagination;
+    const updatedPage = nextEnabled ? currentPage + 1 : currentPage;
+    const updatedNextEnabled = updatedPage !== totalPages;
+
+    set({
+      pagination: {
+        ...props,
+        totalPages: totalPages,
+        previousEnabled: true,
+        nextEnabled: updatedNextEnabled,
+        currentPage: updatedPage,
+      },
+    });
+  },
+  setPrevPage: () => {
+    const { previousEnabled, currentPage, ...props } = get().pagination;
+    const updatedPage = previousEnabled ? currentPage - 1 : currentPage;
+    const updatedPreviousEnabled = updatedPage !== INITIAL_PAGE;
+    set({
+      pagination: {
+        ...props,
+        // nextEnabled: true,
+        previousEnabled: updatedPreviousEnabled,
+        currentPage: updatedPage,
+      },
+    });
+  },
+  setFirstPage: () => {
+    const totalPages = get().pagination.totalPages;
+    set({
+      pagination: {
+        ...get().pagination,
+        currentPage: INITIAL_PAGE,
+        nextEnabled: totalPages !== INITIAL_PAGE,
+        previousEnabled: false,
+      },
+    });
+  },
 }));
 
 export interface ListContextProps {

@@ -21,5 +21,6 @@ module.exports = {
     'prettier/prettier': ['error', prettierConfig],
     'newline-before-return': 'error',
     'import/no-anonymous-default-export': 0,
+    'testing-library/prefer-screen-queries': 0,
   },
 };
