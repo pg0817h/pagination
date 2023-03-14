@@ -5,15 +5,28 @@ import ListPaginationContextProvider, { usePaginationContext } from './list-pagi
 
 describe('ListPaginationContextProvider', () => {
   const NaiveList = () => {
-    const { pagination, setNextPage, setPrevPage } = usePaginationContext();
+    const { pagination, setNextPage, setPrevPage, setFirstPage } = usePaginationContext();
 
     return (
       <div>
         <span>{`currentPage: ${pagination.currentPage}`}</span>
         <span>{`totalPages: ${pagination.totalPages}`}</span>
         <span>{`pageSize: ${pagination.pageSize}`}</span>
-        {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
-        {pagination.previousEnabled && <button onClick={setPrevPage}>back</button>}
+        {
+          <button disabled={!pagination.nextEnabled} onClick={setNextPage}>
+            view more
+          </button>
+        }
+        {
+          <button disabled={!pagination.previousEnabled} onClick={setPrevPage}>
+            back
+          </button>
+        }
+        {
+          <button disabled={!pagination.previousEnabled} onClick={setFirstPage}>
+            To first page
+          </button>
+        }
       </div>
     );
   };
@@ -37,30 +50,32 @@ describe('ListPaginationContextProvider', () => {
     expect(screen.getByText('view more')).not.toBeNull();
   });
 
-  describe('', () => {
-    it('should return currentPage, totalPages, pageSize and view more button (edge case)', () => {
-
-    })
-    it('should return currentPage, totalPages, pageSize and view more button', () => {
-
-    })
-    it('should return currentPage, totalPages, pageSize and view more button', () => {
-
-    })
+  describe('the Pagination Component for first page and last page edge cases ', () => {
+    it('should go back to first page when clicking "back" on first page', () => {
+      const { getByText } = getScreen(8, 4);
+      fireEvent.click(getByText('back'));
+      expect(screen.getByText('currentPage: 1')).not.toBeNull();
+    });
+    it('should go to last page when clicking "view more" multiple times', () => {
+      const { getByText } = getScreen(8, 4);
+      fireEvent.click(getByText('view more'));
+      fireEvent.click(getByText('view more'));
+      expect(screen.getByText('currentPage: 2')).not.toBeNull();
+    });
   });
 
   describe('setNextPage', () => {
     it('should return currentPage, totalPages, pageSize and view more button when view more button is clicked', () => {
-      const { getByText, queryByText } = getScreen(4, 2);
-
+      const { getByText, getByRole } = getScreen(4, 2);
+      const nextBtn = getByRole('button', { name: /view more/i });
       fireEvent.click(getByText('view more'));
 
       expect(getByText('currentPage: 2')).not.toBeNull();
       expect(getByText('totalPages: 2')).not.toBeNull();
       expect(getByText('pageSize: 2')).not.toBeNull();
-      expect(queryByText('view more')).toBeNull();
+      expect(nextBtn.disabled).toBeTruthy();
     });
-    // TODO
+
     it('Should render the `Back` button when clicking on the `view more` button', () => {
       const { getByText } = getScreen(4, 2);
 
@@ -89,12 +104,11 @@ describe('ListPaginationContextProvider', () => {
     it('Should render a view more button when totalPage is not equal to `INITIAL_PAGE`', () => {
       getScreen(4, 2);
 
-      fireEvent.click(getByText('view more'));
-      fireEvent.click(getByText('To first page'));
+      fireEvent.click(screen.getByText('view more'));
+      fireEvent.click(screen.getByText('To first page'));
 
       expect(screen.getByText('currentPage: 1')).not.toBeNull();
       expect(screen.queryByText('totalPages: 2')).not.toBeNull();
-      expect(screen.getByText('view more')).not.toBeNull();
     });
   });
 
@@ -106,8 +120,9 @@ describe('ListPaginationContextProvider', () => {
     });
 
     it('Should return an error message when total and perpage exceed the maximum value of an integer', () => {
-      getScreen(Number.MAX_SAFE_INTEGER + 1, Number.MAX_SAFE_INTEGER + 1);
-      expect(screen.getByTestId('errorMessage')).not.toBeNull();
+      expect(() => getScreen(Number.MAX_SAFE_INTEGER + 1, Number.MAX_SAFE_INTEGER + 1)).toThrow(
+        'The number of items exceeds the maximum safe integer value. Please reduce the number of items and try again',
+      );
     });
   });
 });
