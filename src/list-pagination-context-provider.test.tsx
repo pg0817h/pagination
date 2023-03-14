@@ -1,3 +1,5 @@
+/* eslint-disable testing-library/prefer-presence-queries */
+/* eslint-disable prettier/prettier */
 import * as React from 'react';
 import expect from 'expect';
 import { screen, render, fireEvent } from '@testing-library/react';
