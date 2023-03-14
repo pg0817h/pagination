@@ -15,7 +15,6 @@ type PaginationMeta = {
 
 type Pagination = PaginationState & PaginationMeta;
 type PaginationArgs = Pick<PaginationState, 'totalItems' | 'pageSize'>;
-
 const INITIAL_PAGE = 1;
 
 export const usePaginationContext = create<{
@@ -68,7 +67,7 @@ export const usePaginationContext = create<{
     set({
       pagination: {
         ...props,
-        // nextEnabled: true,
+        nextEnabled: true,
         previousEnabled: updatedPreviousEnabled,
         currentPage: updatedPage,
       },
@@ -96,12 +95,17 @@ type ListPaginationContextProps = ListContextProps;
 
 const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> = ({ children, value }) => {
   const { setPagination } = usePaginationContext();
-
   React.useEffect(() => {
-    setPagination({
-      pageSize: value.perPage,
-      totalItems: value.total,
-    });
+    if (value.total <= 0 || value.perPage <= 0) {
+      throw new Error('The total items and page size must be positive numbers. Please try again.');
+    } else if (value.total >= Number.MAX_SAFE_INTEGER || value.perPage >= Number.MAX_SAFE_INTEGER) {
+      throw new Error('The number of items exceeds the maximum safe integer value. Please reduce the number of items and try again.');
+    } else {
+      setPagination({
+        pageSize: value.perPage,
+        totalItems: value.total,
+      });
+    }
   }, [value]);
 
   return <>{children}</>;
