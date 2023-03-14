@@ -67,7 +67,7 @@ describe('ListPaginationContextProvider', () => {
   describe('setNextPage', () => {
     it('should return currentPage, totalPages, pageSize and view more button when view more button is clicked', () => {
       const { getByText, getByRole } = getScreen(4, 2);
-      const nextBtn = getByRole('button', { name: /view more/i });
+      const nextBtn = getByRole('button', { name: /view more/i }) as HTMLButtonElement;
       fireEvent.click(getByText('view more'));
 
       expect(getByText('currentPage: 2')).not.toBeNull();
