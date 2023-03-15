@@ -7,6 +7,7 @@ module.exports = {
         exclude: /node_modules/,
         use: ['babel-loader'],
       },
+      // eslint-disable-next-line import/no-extraneous-dependencies
       {
         test: /\.(s?)css$/,
         use: ['style-loader', 'css-loader', 'resolve-url-loader', 'sass-loader'],
